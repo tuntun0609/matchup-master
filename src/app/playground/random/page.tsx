@@ -46,7 +46,7 @@ export default function RandomPage() {
           setTransformStyles({
             ...transformStyles,
             [selectedIndex]: {
-              transform: `translate(${translateX}px, ${translateY}px) scale(1.5)`,
+              transform: `translate(${translateX}px, ${translateY}px) scale(1)`,
               background: 'transparent',
               border: 'none',
               boxShadow: 'none',
@@ -62,7 +62,8 @@ export default function RandomPage() {
           setTimeout(() => {
             const textElement = document.querySelector(`#player-${selectedIndex} p`) as HTMLElement
             if (textElement) {
-              textElement.style.fontSize = '4rem'
+              // textElement.style.fontSize = '4rem'
+              textElement.style.scale = '6'
               textElement.style.color = 'var(--green-700)'
             }
           }, 500) // 在卡片到达中央后再变化字体
@@ -79,7 +80,7 @@ export default function RandomPage() {
       // 找到选中玩家的文本元素并重置样式
       const textElement = document.querySelector(`#player-${selectedIndex} p`) as HTMLElement
       if (textElement) {
-        textElement.style.fontSize = ''
+        textElement.style.scale = '1'
         textElement.style.color = ''
 
         await sleep(300)
