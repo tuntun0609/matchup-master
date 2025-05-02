@@ -2,20 +2,11 @@
 
 import { useCallback, useState, useEffect } from 'react'
 import { useAtom } from 'jotai'
+import { shuffle } from 'lodash-es'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { playersAtom } from '@/store/players'
-
-// Fisher-Yates 洗牌算法
-const shuffleArray = <T,>(array: T[]): T[] => {
-  const shuffled = [...array]
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-  }
-  return shuffled
-}
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -32,7 +23,7 @@ export default function RandomPage() {
   // 初始化时生成随机顺序
   useEffect(() => {
     const indices = Array.from({ length: players.length }, (_, i) => i)
-    setSelectionOrder(shuffleArray(indices))
+    setSelectionOrder(shuffle(indices))
   }, [players])
 
   // 计算元素到屏幕中央的transform
@@ -74,11 +65,11 @@ export default function RandomPage() {
       // 等待动画完成
       await sleep(500)
     }
-
     setSelectedIndex(null)
-    // await sleep(1000)
+
     if (currentSelectionIndex >= selectionOrder.length) {
       // 所有玩家都已被选择
+      setIsSelecting(false)
       return
     }
 
@@ -89,11 +80,57 @@ export default function RandomPage() {
 
     const nextSelectedIndex = selectionOrder[currentSelectionIndex]
     let currentHighlightIndex = 0
-    let interval = 80 // 初始间隔时间 (ms)，从100减至80
+
+    // 计算未选择的玩家数量
+    const remainingPlayers = players.length - selectedList.length
+
+    // 如果只剩最后一个玩家，直接选中它
+    if (remainingPlayers === 1) {
+      // 找出最后一个未选择的玩家
+      const lastPlayerIndex = players.findIndex(player => !selectedList.includes(player))
+
+      // 直接选中该玩家
+      setSelectedIndex(lastPlayerIndex)
+      setSelectedList(prev => [...prev, players[lastPlayerIndex]])
+      setCurrentSelectionIndex(prev => prev + 1)
+
+      // 计算该玩家到屏幕中央的transform
+      requestAnimationFrame(() => {
+        const element = document.getElementById(`player-${lastPlayerIndex}`)
+        if (element) {
+          const rect = element.getBoundingClientRect()
+          const centerX = window.innerWidth / 2
+          const centerY = window.innerHeight / 2
+
+          // 计算到屏幕中央的偏移量
+          const translateX = centerX - rect.left - rect.width / 2
+          const translateY = centerY - rect.top - rect.height / 2
+
+          setTransformStyles({
+            ...transformStyles,
+            [lastPlayerIndex]: {
+              transform: `translate(${translateX}px, ${translateY}px) scale(1.1)`,
+            },
+          })
+        }
+      })
+
+      // 不执行后续的选择动画
+      setIsSelecting(false)
+      return
+    }
+
+    // 根据剩余玩家数量动态调整参数
+    // 玩家越少，动画越短
+    let interval = Math.max(40, 80 - (10 - remainingPlayers) * 5) // 基础间隔，剩余玩家少时减小间隔
     let rounds = 0
-    const maxRounds = 1 // 最少旋转的圈数，从2减至1
-    const acceleration = 1.4 // 每次速度减慢的系数，从1.15增至1.4
-    const maxInterval = 300 // 最大间隔时间 (ms)，从500减至300
+    const maxRounds = Math.max(0.5, Math.min(1, remainingPlayers / 10)) // 最少旋转的圈数，随玩家减少而减少
+    const acceleration = Math.min(2.0, 1.4 + (10 - remainingPlayers) * 0.06) // 加速系数，剩余玩家少时加速更快
+    const maxInterval = Math.max(150, 300 - (10 - remainingPlayers) * 15) // 最大间隔，剩余玩家少时减小
+
+    console.log(
+      `剩余玩家: ${remainingPlayers}, 间隔: ${interval}, 最大圈数: ${maxRounds}, 加速: ${acceleration}, 最大间隔: ${maxInterval}`
+    )
 
     const selectAnimation = () => {
       // 高亮当前玩家
@@ -155,6 +192,8 @@ export default function RandomPage() {
               style={selectedIndex === index ? transformStyles[index] : {}}
               className={cn(
                 'min-w-[120px] rounded-lg border-2 bg-white p-4 text-center shadow-md dark:bg-gray-800',
+                // 已选择过的玩家样式变淡
+                selectedList.includes(player) && selectedIndex !== index && 'opacity-50',
                 selectedIndex === index && 'transition-all duration-500 ease-in-out',
                 selectedIndex === index &&
                   'z-50 border-green-500 bg-green-100 shadow-xl shadow-green-200 dark:bg-green-900 dark:shadow-green-900/50',
@@ -182,7 +221,7 @@ export default function RandomPage() {
         <Button
           onClick={startSelection}
           className="rounded-lg bg-blue-500 px-6 py-2 text-white hover:bg-blue-600"
-          disabled={isSelecting || currentSelectionIndex >= selectionOrder.length}
+          disabled={isSelecting}
         >
           随机选择
         </Button>
