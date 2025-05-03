@@ -3,6 +3,7 @@
 import { useCallback, useState, useEffect } from 'react'
 import { useAtom } from 'jotai'
 import { shuffle } from 'lodash-es'
+import { ChevronRight } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -205,14 +206,14 @@ export default function RandomPage() {
   return (
     <>
       <div className="relative flex min-h-screen flex-col items-center justify-center gap-8">
-        <div className="flex max-w-4xl flex-wrap justify-center gap-x-4 gap-y-6">
+        <div className="max-w-8xl flex flex-wrap justify-center gap-x-4 gap-y-6">
           {players.map((player, index) => (
             <div
               id={`player-${index}`}
               key={index}
               style={selectedIndex === index ? transformStyles[index] : {}}
               className={cn(
-                'min-w-[120px] rounded-lg border-2 bg-white p-4 text-center shadow-md dark:bg-gray-800',
+                'w-[180px] rounded-lg border-2 bg-white p-4 text-center shadow-md dark:bg-gray-800',
                 'flex h-[80px] items-center justify-center',
                 // 已选择过的玩家样式变淡
                 selectedList.includes(player) && selectedIndex !== index && 'opacity-50',
@@ -244,12 +245,8 @@ export default function RandomPage() {
       </div>
 
       <div className="fixed bottom-2 left-2 flex items-center gap-4">
-        <Button
-          onClick={startSelection}
-          className="rounded-lg bg-blue-500 px-6 py-2 text-white hover:bg-blue-600"
-          disabled={isSelecting}
-        >
-          随机选择
+        <Button onClick={startSelection} disabled={isSelecting} variant="outline">
+          <ChevronRight />
         </Button>
       </div>
     </>
