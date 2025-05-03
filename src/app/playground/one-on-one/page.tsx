@@ -19,6 +19,11 @@ export default function OneOnOne() {
   const [groupIndex, setGroupIndex] = useState<number>(0)
   const [highlightedPlayers, setHighlightedPlayers] = useState<string[]>([])
   const [otherCardsVisible, setOtherCardsVisible] = useState(true)
+  const [showVsAnimation, setShowVsAnimation] = useState(false)
+  const [transformStyles, setTransformStyles] = useState<Record<number, React.CSSProperties>>({})
+
+  const [winPlayers, setWinPlayers] = useState<string[]>([])
+  const [losePlayers, setLosePlayers] = useState<string[]>([])
 
   useEffect(() => {
     if (!players.length) return
@@ -32,42 +37,89 @@ export default function OneOnOne() {
       if (i + 1 < shuffledPlayers.length) {
         groups.push([shuffledPlayers[i], shuffledPlayers[i + 1]])
       } else {
-        // 如果玩家数量为奇数，最后一个玩家单独一组
         groups.push([shuffledPlayers[i]])
       }
     }
 
-    console.log(groups)
-
     setPlayerGroups(groups)
   }, [players])
+
+  useEffect(() => {
+    if (highlightedPlayers.length === 2 && showVsAnimation) {
+      requestAnimationFrame(() => {
+        const vsElement = document.querySelector('.vs-text') as HTMLElement
+        if (!vsElement) return
+
+        const vsRect = vsElement.getBoundingClientRect()
+        const vsCenter = {
+          x: vsRect.left + vsRect.width / 2,
+          y: vsRect.top + vsRect.height / 2,
+        }
+
+        const spacing = 100 // VS到文字边缘的固定距离
+        const scale = 3
+
+        highlightedPlayers.forEach((player, idx) => {
+          const playerIndex = players.findIndex(p => p === player)
+          const element = document.getElementById(`player-${playerIndex}`)
+          if (!element) return
+          const textElement = element.querySelector('p') as HTMLElement
+          if (!textElement) return
+
+          const textRect = textElement.getBoundingClientRect()
+          const textCenterX = textRect.left + textRect.width / 2
+          const textCenterY = textRect.top + textRect.height / 2
+
+          let translateX
+          if (idx === 0) {
+            // 左侧文字：右边缘到VS的距离为spacing
+            translateX = vsCenter.x - spacing - (textCenterX + (textRect.width / 2) * scale)
+          } else {
+            // 右侧文字：左边缘到VS的距离为spacing
+            translateX = vsCenter.x + spacing - (textCenterX - (textRect.width / 2) * scale)
+          }
+
+          const translateY = vsCenter.y - textCenterY
+
+          setTransformStyles(prev => ({
+            ...prev,
+            [playerIndex]: {
+              transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`,
+              transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+              zIndex: 50,
+            },
+          }))
+        })
+      })
+    } else if (!showVsAnimation) {
+      setTransformStyles({})
+    }
+  }, [highlightedPlayers, showVsAnimation, players])
 
   const startGame = async () => {
     if (isSelecting) return
 
-    console.log(highlightedPlayers.length, highlightedPlayers)
     if (highlightedPlayers.length > 0) {
-      setHighlightedPlayers(() => [])
+      // 重置所有状态
+      setHighlightedPlayers([])
       setOtherCardsVisible(true)
+      setShowVsAnimation(false)
       return
     }
-
-    // 第一轮循环全部玩家
-    // 第二轮循环选中待选列表第一组的第一名玩家，停顿 1s 后，走完之后的循环
-    // 第三轮循环选中待选列表第一组的第二名玩家，停顿 1s
 
     setIsSelecting(true)
 
     const currentGroup = playerGroups[groupIndex]
     setGroupIndex(groupIndex + 1)
 
-    console.log(currentGroup)
-
     try {
       // 第一阶段：快速循环所有玩家
       const fastInterval = 80
       for (let round = 0; round < 1; round++) {
         for (let i = 0; i < players.length; i++) {
+          // 如果已经被选过，则跳过
+          if (winPlayers.includes(players[i]) || losePlayers.includes(players[i])) continue
+
           setHighlightIndex(i)
           await sleep(fastInterval)
         }
@@ -83,6 +135,9 @@ export default function OneOnOne() {
         const acceleration = 1.3
 
         for (let i = 0; i < firstPlayerIndex; i++) {
+          // 如果已经被选过，则跳过
+          if (winPlayers.includes(players[i]) || losePlayers.includes(players[i])) continue
+
           setHighlightIndex(i)
           interval = Math.min(interval * acceleration, maxInterval)
           await sleep(interval)
@@ -112,14 +167,14 @@ export default function OneOnOne() {
           await sleep(300)
           setHighlightedPlayers(prevPlayers => [...prevPlayers, currentGroup[1]])
 
-          // 短暂淡出其他卡片
+          // 短暂淡出其他卡片并开始VS动画
           await sleep(500)
           setOtherCardsVisible(false)
-          await sleep(1500)
+          await sleep(300)
+          setShowVsAnimation(true)
         }
       }
 
-      // 重置高亮索引
       setHighlightIndex(null)
     } finally {
       setIsSelecting(false)
@@ -134,33 +189,49 @@ export default function OneOnOne() {
             <motion.div
               id={`player-${index}`}
               key={index}
+              style={transformStyles[index]}
               className={cn(
-                'w-[180px] rounded-lg border-2 bg-white p-4 text-center shadow-md dark:bg-gray-800',
+                'w-[180px] rounded-lg border-2 p-4 text-center shadow-md',
                 'flex h-[80px] items-center justify-center',
+                'transition-[opacity,background,transform,color,font-size] duration-500 ease-in-out',
+                highlightIndex === null &&
+                  'transition-[opacity,background,transform,color,font-size,border-color]',
+                'bg-white dark:bg-gray-800',
                 highlightedPlayers.includes(player) && 'z-50',
                 !otherCardsVisible && !highlightedPlayers.includes(player) && 'opacity-0'
               )}
               animate={{
                 borderColor:
-                  highlightIndex === index
-                    ? 'rgb(59, 130, 246)'
-                    : highlightedPlayers.includes(player)
-                      ? 'rgb(59, 130, 246)'
-                      : 'var(--border)',
-                opacity: otherCardsVisible || highlightedPlayers.includes(player) ? 1 : 0,
+                  showVsAnimation && highlightedPlayers.includes(player)
+                    ? 'transparent'
+                    : winPlayers.includes(player)
+                      ? 'rgb(34, 197, 94)' // 绿色
+                      : losePlayers.includes(player)
+                        ? 'rgb(239, 68, 68)' // 红色
+                        : highlightIndex === index
+                          ? 'rgb(59, 130, 246)'
+                          : highlightedPlayers.includes(player)
+                            ? 'rgb(59, 130, 246)'
+                            : 'var(--border)',
+                backgroundColor:
+                  showVsAnimation && highlightedPlayers.includes(player)
+                    ? 'transparent'
+                    : winPlayers.includes(player)
+                      ? 'rgba(34, 197, 94, 0.5)'
+                      : losePlayers.includes(player)
+                        ? 'rgba(239, 68, 68, 0.5)'
+                        : undefined,
               }}
               transition={{
                 type: 'spring',
                 stiffness: 400,
                 damping: 25,
-                opacity: { duration: 0.5 },
               }}
             >
               <motion.p
                 className="text-lg text-gray-900 dark:text-gray-100"
                 animate={{
-                  scale: highlightedPlayers.includes(player) ? 1.2 : 1,
-                  color: highlightedPlayers.includes(player) ? 'rgb(14, 159, 110)' : 'white',
+                  scale: highlightedPlayers.includes(player) && !showVsAnimation ? 1 : 1,
                 }}
                 transition={{
                   delay: highlightedPlayers.includes(player) ? 0.2 : 0,
@@ -171,10 +242,63 @@ export default function OneOnOne() {
             </motion.div>
           ))}
         </div>
+
+        {showVsAnimation && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="vs-text fixed top-1/2 left-1/2 z-40 -translate-x-1/2 -translate-y-1/2 text-6xl font-bold"
+          >
+            <span className="bg-white bg-clip-text text-transparent">VS</span>
+          </motion.div>
+        )}
       </div>
+
       <div className="fixed bottom-0 left-0 flex justify-center gap-4 p-4">
-        <Button onClick={startGame} disabled={isSelecting} variant="outline">
+        <Button
+          onClick={startGame}
+          disabled={isSelecting || highlightedPlayers.length !== 0}
+          variant="outline"
+        >
           <ChevronRight />
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => {
+            if (highlightedPlayers.length === 0) return
+            setHighlightedPlayers([])
+            setOtherCardsVisible(true)
+            setShowVsAnimation(false)
+
+            setTimeout(() => {
+              setWinPlayers([...winPlayers, highlightedPlayers[0]])
+              setLosePlayers([...losePlayers, highlightedPlayers[1]])
+
+              setHighlightIndex(null)
+            }, 500)
+          }}
+        >
+          1
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => {
+            if (highlightedPlayers.length === 0) return
+            setHighlightedPlayers([])
+            setOtherCardsVisible(true)
+            setShowVsAnimation(false)
+            setHighlightIndex(null)
+
+            setTimeout(() => {
+              setWinPlayers([...winPlayers, highlightedPlayers[1]])
+              setLosePlayers([...losePlayers, highlightedPlayers[0]])
+
+              setHighlightIndex(null)
+            }, 500)
+          }}
+        >
+          2
         </Button>
       </div>
     </>
