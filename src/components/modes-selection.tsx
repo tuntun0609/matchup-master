@@ -9,16 +9,22 @@ const modes = [
     href: '/random',
   },
   {
-    title: '一对一',
+    title: '32强/16强一对一',
     description: '两两配对进行比赛',
     icon: Users,
-    href: '/one-on-one',
+    href: '/one-on-one-group',
   },
   {
     title: '单轮淘汰赛',
     description: '输一场即被淘汰',
     icon: Trophy,
     href: '/knockout',
+  },
+  {
+    title: '两名选手 1v1',
+    description: '两名选手一对一比赛',
+    icon: Users,
+    href: '/one-on-one',
   },
 ]
 

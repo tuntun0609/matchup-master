@@ -35,7 +35,7 @@ export const playersAtom = atom<string[]>([
   '曾磊',
 ])
 
-export const oneOnOnePlayersAtom = atom<string[]>([
+export const oneOnOneGroupPlayersAtom = atom<string[]>([
   '刘1231颖',
   '陈勇',
   '杨秀英',
@@ -53,3 +53,5 @@ export const oneOnOnePlayersAtom = atom<string[]>([
   '林涛',
   '何静',
 ])
+
+export const oneOnOnePlayersAtom = atom<string[]>(['刘1231颖', '陈勇'])
