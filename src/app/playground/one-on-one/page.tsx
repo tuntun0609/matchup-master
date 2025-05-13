@@ -76,7 +76,7 @@ export default function OneOnOne() {
         </motion.div>
 
         <motion.div
-          className="text-6xl font-bold"
+          className="text-6xl"
           animate={{
             opacity: showVs ? 1 : 0,
           }}

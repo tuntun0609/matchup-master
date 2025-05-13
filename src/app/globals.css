@@ -76,6 +76,12 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --player-win: rgb(34, 197, 94);
+  --player-win-bg: rgba(34, 197, 94, 0.1);
+  --player-lose: rgb(239, 68, 68);
+  --player-lose-bg: rgba(239, 68, 68, 0.1);
+  --player-highlight: rgb(59, 130, 246);
+  --player-highlight-bg: rgba(59, 130, 246, 0.1);
 }
 
 .dark {
@@ -110,6 +116,12 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --player-win: rgb(34, 197, 94);
+  --player-win-bg: rgba(34, 197, 94, 0.1);
+  --player-lose: rgb(239, 68, 68);
+  --player-lose-bg: rgba(239, 68, 68, 0.1);
+  --player-highlight: rgb(59, 130, 246);
+  --player-highlight-bg: rgba(59, 130, 246, 0.1);
 }
 
 @layer base {

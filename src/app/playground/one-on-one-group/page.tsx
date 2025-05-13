@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { useAtom } from 'jotai'
 import { ChevronRight } from 'lucide-react'
 import { motion } from 'motion/react'
@@ -196,7 +196,7 @@ export default function OneOnOne() {
                 'transition-[opacity,background,transform,color,font-size] duration-500 ease-in-out',
                 highlightIndex === null &&
                   'transition-[opacity,background,transform,color,font-size,border-color]',
-                'bg-white dark:bg-gray-800',
+                'bg-white dark:bg-black',
                 highlightedPlayers.includes(player) && 'z-50',
                 !otherCardsVisible && !highlightedPlayers.includes(player) && 'opacity-0'
               )}
@@ -220,7 +220,7 @@ export default function OneOnOne() {
                       ? 'rgba(34, 197, 94, 0.5)'
                       : losePlayers.includes(player)
                         ? 'rgba(239, 68, 68, 0.5)'
-                        : undefined,
+                        : 'var(--background)',
               }}
               transition={{
                 type: 'spring',
@@ -229,7 +229,7 @@ export default function OneOnOne() {
               }}
             >
               <motion.p
-                className="text-lg text-gray-900 dark:text-gray-100"
+                className="text-2xl text-gray-900 dark:text-gray-100"
                 animate={{
                   scale: highlightedPlayers.includes(player) && !showVsAnimation ? 1 : 1,
                 }}
@@ -270,6 +270,7 @@ export default function OneOnOne() {
             setHighlightedPlayers([])
             setOtherCardsVisible(true)
             setShowVsAnimation(false)
+            setHighlightIndex(null)
 
             setTimeout(() => {
               setWinPlayers([...winPlayers, highlightedPlayers[0]])
