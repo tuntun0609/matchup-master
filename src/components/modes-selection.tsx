@@ -32,6 +32,12 @@ const modes = [
     icon: Users,
     href: '/one-on-one',
   },
+  {
+    title: '入围展示页',
+    description: '入围展示页',
+    icon: Users,
+    href: '/showcase',
+  },
 ]
 
 export default function ModeSelection() {
