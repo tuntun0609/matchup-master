@@ -95,7 +95,7 @@ export default function EightStrongFirstRound() {
   }, [highlightedPlayers, showVsAnimation, players])
 
   const startGame = async () => {
-    if (isSelecting) return
+    if (isSelecting || winPlayers.length === 2) return
 
     if (highlightedPlayers.length > 0) {
       // 重置所有状态
