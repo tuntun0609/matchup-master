@@ -56,7 +56,7 @@ export const oneOnOneGroupPlayersAtom = atom<string[]>([
 
 export const oneOnOnePlayersAtom = atom<string[]>(['刘1231颖', '陈勇'])
 
-export const knockoutPlayersAtom = atom<string[]>([
+export const eightStrongFirstRoundPlayersAtom = atom<string[]>([
   '张伟',
   '李娜',
   '王刚',
@@ -66,3 +66,5 @@ export const knockoutPlayersAtom = atom<string[]>([
   '杨强',
   '周红',
 ])
+
+export const eightStrongSecondRoundPlayersAtom = atom<string[]>(['张伟', '李娜', '王刚', '刘芳'])

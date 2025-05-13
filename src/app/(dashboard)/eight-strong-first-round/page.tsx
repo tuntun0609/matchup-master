@@ -6,10 +6,10 @@ import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { knockoutPlayersAtom } from '@/store/players'
+import { eightStrongFirstRoundPlayersAtom } from '@/store/players'
 
-export default function Knockout() {
-  const [players, setPlayers] = useAtom(knockoutPlayersAtom)
+export default function EightStrongFirstRound() {
+  const [players, setPlayers] = useAtom(eightStrongFirstRoundPlayersAtom)
   const router = useRouter()
 
   const handleStartGame = () => {
@@ -17,7 +17,7 @@ export default function Knockout() {
       toast.error('请输入所有选手的姓名')
       return
     }
-    router.push('/playground/knockout')
+    router.push('/playground/eight-strong-first-round')
   }
 
   const handlePlayerChange = (index: number, value: string) => {

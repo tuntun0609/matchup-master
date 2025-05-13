@@ -280,7 +280,7 @@ export default function OneOnOne() {
             }, 500)
           }}
         >
-          1
+          L
         </Button>
         <Button
           variant="outline"
@@ -299,7 +299,7 @@ export default function OneOnOne() {
             }, 500)
           }}
         >
-          2
+          R
         </Button>
       </div>
     </>

@@ -15,10 +15,16 @@ const modes = [
     href: '/one-on-one-group',
   },
   {
-    title: '单轮淘汰赛',
-    description: '输一场即被淘汰',
+    title: '8强第一轮',
+    description: '8强第一轮比赛',
     icon: Trophy,
-    href: '/knockout',
+    href: '/eight-strong-first-round',
+  },
+  {
+    title: '8强其余轮次',
+    description: '8强其余轮次比赛',
+    icon: Trophy,
+    href: '/eight-strong-second-round',
   },
   {
     title: '两名选手 1v1',
