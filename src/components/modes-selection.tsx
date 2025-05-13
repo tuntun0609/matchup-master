@@ -9,7 +9,7 @@ const modes = [
     href: '/random',
   },
   {
-    title: '32强/16强一对一',
+    title: '16强一对一',
     description: '两两配对进行比赛',
     icon: Users,
     href: '/one-on-one-group',
