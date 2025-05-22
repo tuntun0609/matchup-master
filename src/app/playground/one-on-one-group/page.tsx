@@ -272,7 +272,7 @@ export default function OneOnOne() {
               <motion.p
                 data-player={player}
                 className={cn(
-                  'text-2xl text-gray-900 transition-colors duration-300 dark:text-gray-100',
+                  'text-2xl text-gray-900 transition-colors duration-500 dark:text-gray-100',
                   winPlayers.includes(player) && '!text-[#f3df8e]'
                 )}
                 animate={{

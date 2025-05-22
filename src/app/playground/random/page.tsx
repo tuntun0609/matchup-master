@@ -141,7 +141,7 @@ export default function RandomPage() {
       .map(item => item.index)
 
     // 第一阶段：快速循环两圈
-    const fastInterval = 50 // 快速循环的间隔时间
+    const fastInterval = 40 // 快速循环的间隔时间
     const firstPhaseHighlight = async () => {
       // 完成两圈快速循环
       for (let round = 0; round < 1; round++) {
@@ -213,7 +213,7 @@ export default function RandomPage() {
               key={index}
               style={selectedIndex === index ? transformStyles[index] : {}}
               className={cn(
-                'w-[180px] rounded-lg border-2 bg-white p-4 text-center shadow-md dark:bg-gray-800',
+                'w-[180px] rounded-lg bg-transparent p-4 text-center shadow-md',
                 'flex h-[80px] items-center justify-center',
                 // 已选择过的玩家样式变淡
                 selectedList.includes(player) && selectedIndex !== index && 'opacity-50',
@@ -228,7 +228,7 @@ export default function RandomPage() {
                 highlightIndex === index &&
                   selectedIndex !== index &&
                   !selectedList.includes(player) &&
-                  'border-blue-500 shadow-lg dark:shadow-blue-900/50'
+                  'border-2 border-blue-500 shadow-lg dark:shadow-blue-900/50'
               )}
             >
               <p
