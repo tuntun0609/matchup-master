@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion } from 'motion/react'
 import { useAtom } from 'jotai'
-import { Button } from '@/components/ui/button'
-import { oneOnOnePlayersAtom } from '@/store/players'
-import { cn } from '@/lib/utils'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { motion } from 'motion/react'
+
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import { oneOnOnePlayersAtom } from '@/store/players'
 
 export default function OneOnOne() {
   const [players] = useAtom(oneOnOnePlayersAtom)

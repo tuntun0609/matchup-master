@@ -132,3 +132,116 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes textGlow {
+  0% {
+    text-shadow: none;
+  }
+  25% {
+    text-shadow:
+      0 0 15px rgba(255, 215, 0, 0.9),
+      0 0 30px rgba(255, 215, 0, 0.7),
+      0 0 45px rgba(255, 215, 0, 0.5),
+      0 0 60px rgba(255, 215, 0, 0.3);
+  }
+  50% {
+    text-shadow: none;
+  }
+  75% {
+    text-shadow:
+      0 0 15px rgba(255, 215, 0, 0.9),
+      0 0 30px rgba(255, 215, 0, 0.7),
+      0 0 45px rgba(255, 215, 0, 0.5),
+      0 0 60px rgba(255, 215, 0, 0.3);
+  }
+  100% {
+    text-shadow:
+      0 0 15px rgba(255, 215, 0, 0.9),
+      0 0 30px rgba(255, 215, 0, 0.7),
+      0 0 45px rgba(255, 215, 0, 0.5),
+      0 0 60px rgba(255, 215, 0, 0.3);
+  }
+}
+
+.text-glow {
+  animation: textGlow 1s ease-in-out forwards;
+}
+
+@keyframes slot-spin {
+  0% {
+    transform: translateY(-90%);
+    filter: blur(2px);
+  }
+  100% {
+    transform: translateY(1%);
+    filter: blur(2px);
+  }
+}
+
+@keyframes slot-slow {
+  0% {
+    transform: translateY(1%);
+    filter: blur(2px);
+  }
+  100% {
+    transform: translateY(40%);
+    filter: blur(0px);
+  }
+}
+
+@keyframes slot-bounce {
+  0% {
+    transform: translateY(-7%);
+    filter: none;
+  }
+  25% {
+    transform: translateY(3%);
+  }
+  50% {
+    transform: translateY(-1%);
+  }
+  70% {
+    transform: translateY(0.6%);
+  }
+  85% {
+    transform: translateY(-0.3%);
+  }
+  100% {
+    transform: translateY(0);
+    filter: none;
+  }
+}
+
+@keyframes border-bounce {
+  25% {
+    transform: translateY(7%);
+  }
+  50% {
+    transform: translateY(-3%);
+  }
+  70% {
+    transform: translateY(4%);
+  }
+  85% {
+    transform: translateY(-1%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.animate-slot-spin {
+  animation: slot-spin 2s linear infinite;
+}
+
+.animate-slot-slow {
+  animation: slot-slow 1s ease-out forwards;
+}
+
+.animate-slot-bounce {
+  animation: slot-bounce 1s forwards;
+}
+
+.animate-border-bounce {
+  animation: border-bounce 1s forwards;
+}

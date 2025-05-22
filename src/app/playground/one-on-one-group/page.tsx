@@ -21,9 +21,9 @@ export default function OneOnOne() {
   const [otherCardsVisible, setOtherCardsVisible] = useState(true)
   const [showVsAnimation, setShowVsAnimation] = useState(false)
   const [transformStyles, setTransformStyles] = useState<Record<number, React.CSSProperties>>({})
-
   const [winPlayers, setWinPlayers] = useState<string[]>([])
   const [losePlayers, setLosePlayers] = useState<string[]>([])
+  const [isScaling, setIsScaling] = useState(false)
 
   useEffect(() => {
     if (!players.length) return
@@ -45,7 +45,7 @@ export default function OneOnOne() {
   }, [players])
 
   useEffect(() => {
-    if (highlightedPlayers.length === 2 && showVsAnimation) {
+    if (highlightedPlayers.length === 2 && showVsAnimation && isScaling) {
       requestAnimationFrame(() => {
         const vsElement = document.querySelector('.vs-text') as HTMLElement
         if (!vsElement) return
@@ -114,7 +114,7 @@ export default function OneOnOne() {
 
     try {
       // 第一阶段：快速循环所有玩家
-      const fastInterval = 80
+      const fastInterval = 40
       for (let round = 0; round < 1; round++) {
         for (let i = 0; i < players.length; i++) {
           // 如果已经被选过，则跳过
@@ -155,8 +155,21 @@ export default function OneOnOne() {
         if (currentGroup.length > 1) {
           const secondPlayerIndex = players.findIndex(p => p === currentGroup[1])
 
+          // 快速循环所有玩家
+          const fastInterval = 40
+          for (let round = 0; round < 1; round++) {
+            for (let i = 0; i < players.length; i++) {
+              // 如果已经被选过，则跳过
+              if (winPlayers.includes(players[i]) || losePlayers.includes(players[i])) continue
+
+              setHighlightIndex(i)
+              await sleep(fastInterval)
+            }
+          }
+
           // 短暂高亮其他玩家
           for (let i = 0; i < secondPlayerIndex; i++) {
+            if (winPlayers.includes(players[i]) || losePlayers.includes(players[i])) continue
             const index = (highlightIndex! + i) % players.length
             setHighlightIndex(index)
             await sleep(150)
@@ -166,6 +179,8 @@ export default function OneOnOne() {
           setHighlightIndex(secondPlayerIndex)
           await sleep(300)
           setHighlightedPlayers(prevPlayers => [...prevPlayers, currentGroup[1]])
+
+          setIsScaling(true)
 
           // 短暂淡出其他卡片并开始VS动画
           await sleep(500)
@@ -181,6 +196,30 @@ export default function OneOnOne() {
     }
   }
 
+  const handleWin = async (isLeft: boolean) => {
+    if (highlightedPlayers.length === 0) return
+
+    setTimeout(async () => {
+      if (isLeft) {
+        setWinPlayers([...winPlayers, highlightedPlayers[0]])
+        setLosePlayers([...losePlayers, highlightedPlayers[1]])
+      } else {
+        setWinPlayers([...winPlayers, highlightedPlayers[1]])
+        setLosePlayers([...losePlayers, highlightedPlayers[0]])
+      }
+
+      await sleep(2000)
+
+      setHighlightedPlayers([])
+      setOtherCardsVisible(true)
+      setShowVsAnimation(false)
+      setHighlightIndex(null)
+
+      await sleep(300)
+      setIsScaling(false)
+    }, 500)
+  }
+
   return (
     <>
       <div className="relative flex min-h-screen flex-col items-center justify-center gap-8">
@@ -191,36 +230,38 @@ export default function OneOnOne() {
               key={index}
               style={transformStyles[index]}
               className={cn(
-                'w-[180px] rounded-lg border-2 p-4 text-center shadow-md',
+                'w-[180px] rounded-lg p-4 text-center shadow-md',
                 'flex h-[80px] items-center justify-center',
                 'transition-[opacity,background,transform,color,font-size] duration-500 ease-in-out',
                 highlightIndex === null &&
-                  'transition-[opacity,background,transform,color,font-size,border-color]',
+                  'transition-[opacity,background,transform,color,font-size,border-color,shadow]',
+                (highlightIndex === index || highlightedPlayers.includes(player)) && 'border-2',
                 'bg-white dark:bg-black',
                 highlightedPlayers.includes(player) && 'z-50',
-                !otherCardsVisible && !highlightedPlayers.includes(player) && 'opacity-0'
+                isScaling && 'z-10',
+                !otherCardsVisible && !highlightedPlayers.includes(player)
+                  ? 'opacity-0'
+                  : losePlayers.includes(player)
+                    ? 'opacity-30'
+                    : 'opacity-100'
               )}
               animate={{
                 borderColor:
-                  showVsAnimation && highlightedPlayers.includes(player)
+                  winPlayers.includes(player) || losePlayers.includes(player)
                     ? 'transparent'
-                    : winPlayers.includes(player)
-                      ? 'rgb(34, 197, 94)' // 绿色
-                      : losePlayers.includes(player)
-                        ? 'rgb(239, 68, 68)' // 红色
-                        : highlightIndex === index
+                    : showVsAnimation && highlightedPlayers.includes(player)
+                      ? 'transparent'
+                      : highlightIndex === index
+                        ? 'rgb(59, 130, 246)'
+                        : highlightedPlayers.includes(player)
                           ? 'rgb(59, 130, 246)'
-                          : highlightedPlayers.includes(player)
-                            ? 'rgb(59, 130, 246)'
-                            : 'var(--border)',
+                          : 'var(--border)',
                 backgroundColor:
                   showVsAnimation && highlightedPlayers.includes(player)
                     ? 'transparent'
                     : winPlayers.includes(player)
-                      ? 'rgba(34, 197, 94, 0.5)'
-                      : losePlayers.includes(player)
-                        ? 'rgba(239, 68, 68, 0.5)'
-                        : 'var(--background)',
+                      ? 'rgba(34, 197, 94, 0.5, 0)'
+                      : 'var(--background)',
               }}
               transition={{
                 type: 'spring',
@@ -229,9 +270,17 @@ export default function OneOnOne() {
               }}
             >
               <motion.p
-                className="text-2xl text-gray-900 dark:text-gray-100"
+                data-player={player}
+                className={cn(
+                  'text-2xl text-gray-900 transition-colors duration-300 dark:text-gray-100',
+                  winPlayers.includes(player) && '!text-[#f3df8e]'
+                )}
                 animate={{
+                  // color: winPlayers.includes(player) ? '#f3df8e' : 'inherit',
                   scale: highlightedPlayers.includes(player) && !showVsAnimation ? 1 : 1,
+                  // textShadow: winPlayers.includes(player)
+                  //   ? '0 0 15px rgba(255, 215, 0, 0.9), 0 0 30px rgba(255, 215, 0, 0.7), 0 0 45px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.3)'
+                  //   : 'none',
                 }}
                 transition={{
                   delay: highlightedPlayers.includes(player) ? 0.2 : 0,
@@ -263,42 +312,10 @@ export default function OneOnOne() {
         >
           <ChevronRight />
         </Button>
-        <Button
-          variant="outline"
-          onClick={() => {
-            if (highlightedPlayers.length === 0) return
-            setHighlightedPlayers([])
-            setOtherCardsVisible(true)
-            setShowVsAnimation(false)
-            setHighlightIndex(null)
-
-            setTimeout(() => {
-              setWinPlayers([...winPlayers, highlightedPlayers[0]])
-              setLosePlayers([...losePlayers, highlightedPlayers[1]])
-
-              setHighlightIndex(null)
-            }, 500)
-          }}
-        >
+        <Button variant="outline" onClick={() => handleWin(true)}>
           L
         </Button>
-        <Button
-          variant="outline"
-          onClick={() => {
-            if (highlightedPlayers.length === 0) return
-            setHighlightedPlayers([])
-            setOtherCardsVisible(true)
-            setShowVsAnimation(false)
-            setHighlightIndex(null)
-
-            setTimeout(() => {
-              setWinPlayers([...winPlayers, highlightedPlayers[1]])
-              setLosePlayers([...losePlayers, highlightedPlayers[0]])
-
-              setHighlightIndex(null)
-            }, 500)
-          }}
-        >
+        <Button variant="outline" onClick={() => handleWin(false)}>
           R
         </Button>
       </div>

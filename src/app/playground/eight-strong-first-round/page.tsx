@@ -9,11 +9,12 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { eightStrongFirstRoundPlayersAtom } from '@/store/players'
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
 export default function EightStrongFirstRound() {
   const [players] = useAtom(eightStrongFirstRoundPlayersAtom)
   const [playerGroups, setPlayerGroups] = useState<string[][]>([])
   const [isSelecting, setIsSelecting] = useState(false)
-  const [highlightIndex, setHighlightIndex] = useState<number | null>(null)
   const [groupIndex, setGroupIndex] = useState<number>(0)
   const [highlightedPlayers, setHighlightedPlayers] = useState<string[]>([])
   const [otherCardsVisible, setOtherCardsVisible] = useState(true)
@@ -119,6 +120,30 @@ export default function EightStrongFirstRound() {
     }
   }
 
+  const handleWin = async (isLeft: boolean) => {
+    if (highlightedPlayers.length === 0) return
+
+    const highlightedPlayer = isLeft ? highlightedPlayers[0] : highlightedPlayers[1]
+    const winPlayerElement = document.querySelector(`[data-player="${highlightedPlayer}"]`)
+    if (!winPlayerElement) return
+
+    setTimeout(async () => {
+      if (isLeft) {
+        setWinPlayers([...winPlayers, highlightedPlayers[0]])
+        setLosePlayers([...losePlayers, highlightedPlayers[1]])
+      } else {
+        setWinPlayers([...winPlayers, highlightedPlayers[1]])
+        setLosePlayers([...losePlayers, highlightedPlayers[0]])
+      }
+
+      await sleep(2000)
+
+      setHighlightedPlayers([])
+      setOtherCardsVisible(true)
+      setShowVsAnimation(false)
+    }, 500)
+  }
+
   return (
     <>
       <div className="relative flex min-h-screen flex-col items-center justify-center gap-8">
@@ -129,35 +154,17 @@ export default function EightStrongFirstRound() {
                 id={`player-${players.findIndex(p => p === group[0])}`}
                 style={transformStyles[players.findIndex(p => p === group[0])]}
                 className={cn(
-                  'w-[180px] rounded-lg border-2 border-transparent p-4 text-center shadow-md',
+                  'w-[180px] rounded-lg border-2 border-transparent bg-transparent p-4 text-center shadow-md',
                   'flex h-[80px] items-center justify-center',
                   'transition-[opacity,background,transform,color,font-size] duration-500 ease-in-out',
-                  highlightIndex === null &&
-                    'transition-[opacity,background,transform,color,font-size,border-color]',
-                  'bg-white dark:bg-black',
+                  'transition-[opacity,background,transform,color,font-size,border-color]',
                   highlightedPlayers.includes(group[0]) && 'z-50',
-                  !otherCardsVisible && !highlightedPlayers.includes(group[0]) && 'opacity-0'
+                  !otherCardsVisible && !highlightedPlayers.includes(group[0])
+                    ? 'opacity-0'
+                    : losePlayers.includes(group[0])
+                      ? 'opacity-30'
+                      : 'opacity-100'
                 )}
-                animate={{
-                  borderColor:
-                    showVsAnimation && highlightedPlayers.includes(group[0])
-                      ? 'transparent'
-                      : winPlayers.includes(group[0])
-                        ? 'rgb(34, 197, 94)' // 绿色
-                        : losePlayers.includes(group[0])
-                          ? 'rgb(239, 68, 68)' // 红色
-                          : highlightIndex === players.findIndex(p => p === group[0])
-                            ? 'rgb(59, 130, 246)'
-                            : 'transparent',
-                  backgroundColor:
-                    showVsAnimation && highlightedPlayers.includes(group[0])
-                      ? 'transparent'
-                      : winPlayers.includes(group[0])
-                        ? 'rgba(34, 197, 94, 0.5)'
-                        : losePlayers.includes(group[0])
-                          ? 'rgba(239, 68, 68, 0.5)'
-                          : 'var(--background)',
-                }}
                 transition={{
                   type: 'spring',
                   stiffness: 400,
@@ -165,13 +172,17 @@ export default function EightStrongFirstRound() {
                 }}
               >
                 <motion.p
-                  className="text-4xl text-gray-900 dark:text-gray-100"
                   animate={{
                     scale: highlightedPlayers.includes(group[0]) && !showVsAnimation ? 1 : 1,
                   }}
                   transition={{
                     delay: highlightedPlayers.includes(group[0]) ? 0.2 : 0,
                   }}
+                  className={cn(
+                    'text-4xl text-gray-900 dark:text-gray-100',
+                    winPlayers.includes(group[0]) && 'text-glow'
+                  )}
+                  data-player={group[0]}
                 >
                   {group[0]}
                 </motion.p>
@@ -199,35 +210,17 @@ export default function EightStrongFirstRound() {
                   id={`player-${players.findIndex(p => p === group[1])}`}
                   style={transformStyles[players.findIndex(p => p === group[1])]}
                   className={cn(
-                    'w-[180px] rounded-lg border-2 border-transparent p-4 text-center shadow-md',
+                    'w-[180px] rounded-lg border-2 border-transparent bg-transparent p-4 text-center shadow-md',
                     'flex h-[80px] items-center justify-center',
                     'transition-[opacity,background,transform,color,font-size] duration-500 ease-in-out',
-                    highlightIndex === null &&
-                      'transition-[opacity,background,transform,color,font-size,border-color]',
-                    'bg-white dark:bg-black',
+                    'transition-[opacity,background,transform,color,font-size,border-color]',
                     highlightedPlayers.includes(group[1]) && 'z-50',
-                    !otherCardsVisible && !highlightedPlayers.includes(group[1]) && 'opacity-0'
+                    !otherCardsVisible && !highlightedPlayers.includes(group[1])
+                      ? 'opacity-0'
+                      : losePlayers.includes(group[1])
+                        ? 'opacity-30'
+                        : 'opacity-100'
                   )}
-                  animate={{
-                    borderColor:
-                      showVsAnimation && highlightedPlayers.includes(group[1])
-                        ? 'transparent'
-                        : winPlayers.includes(group[1])
-                          ? 'rgb(34, 197, 94)' // 绿色
-                          : losePlayers.includes(group[1])
-                            ? 'rgb(239, 68, 68)' // 红色
-                            : highlightIndex === players.findIndex(p => p === group[1])
-                              ? 'rgb(59, 130, 246)'
-                              : 'transparent',
-                    backgroundColor:
-                      showVsAnimation && highlightedPlayers.includes(group[1])
-                        ? 'transparent'
-                        : winPlayers.includes(group[1])
-                          ? 'rgba(34, 197, 94, 0.5)'
-                          : losePlayers.includes(group[1])
-                            ? 'rgba(239, 68, 68, 0.5)'
-                            : 'var(--background)',
-                  }}
                   transition={{
                     type: 'spring',
                     stiffness: 400,
@@ -235,13 +228,17 @@ export default function EightStrongFirstRound() {
                   }}
                 >
                   <motion.p
-                    className="text-4xl text-gray-900 dark:text-gray-100"
                     animate={{
                       scale: highlightedPlayers.includes(group[1]) && !showVsAnimation ? 1 : 1,
                     }}
                     transition={{
                       delay: highlightedPlayers.includes(group[1]) ? 0.2 : 0,
                     }}
+                    className={cn(
+                      'text-4xl text-gray-900 dark:text-gray-100',
+                      winPlayers.includes(group[1]) && 'text-glow'
+                    )}
+                    data-player={group[1]}
                   >
                     {group[1]}
                   </motion.p>
@@ -271,42 +268,10 @@ export default function EightStrongFirstRound() {
         >
           <ChevronRight />
         </Button>
-        <Button
-          variant="outline"
-          onClick={() => {
-            if (highlightedPlayers.length === 0) return
-            setHighlightedPlayers([])
-            setOtherCardsVisible(true)
-            setShowVsAnimation(false)
-            setHighlightIndex(null)
-
-            setTimeout(() => {
-              setWinPlayers([...winPlayers, highlightedPlayers[0]])
-              setLosePlayers([...losePlayers, highlightedPlayers[1]])
-
-              setHighlightIndex(null)
-            }, 500)
-          }}
-        >
+        <Button variant="outline" onClick={() => handleWin(true)}>
           L
         </Button>
-        <Button
-          variant="outline"
-          onClick={() => {
-            if (highlightedPlayers.length === 0) return
-            setHighlightedPlayers([])
-            setOtherCardsVisible(true)
-            setShowVsAnimation(false)
-            setHighlightIndex(null)
-
-            setTimeout(() => {
-              setWinPlayers([...winPlayers, highlightedPlayers[1]])
-              setLosePlayers([...losePlayers, highlightedPlayers[0]])
-
-              setHighlightIndex(null)
-            }, 500)
-          }}
-        >
+        <Button variant="outline" onClick={() => handleWin(false)}>
           R
         </Button>
       </div>

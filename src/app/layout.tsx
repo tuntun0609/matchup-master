@@ -3,6 +3,8 @@ import { Provider as JotaiProvider } from 'jotai'
 import { ThemeProvider } from '@/components/theme'
 import { Toaster } from '@/components/ui/sonner'
 
+import SelectSong from './select-song'
+
 import type { Metadata } from 'next'
 import './globals.css'
 
@@ -29,6 +31,7 @@ export default function RootLayout({
             {children}
           </ThemeProvider>
           <Toaster richColors />
+          <SelectSong />
         </JotaiProvider>
       </body>
     </html>
