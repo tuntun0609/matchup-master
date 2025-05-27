@@ -1,11 +1,12 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useAtom } from 'jotai'
 import { useSearchParams } from 'next/navigation'
 
 import { showcaseAtom } from '@/store/showcase'
 
-export default function Showcase() {
+function ShowcasePage() {
   const searchParams = useSearchParams()
   const title = searchParams.get('title')
   const [showcase] = useAtom(showcaseAtom)
@@ -29,5 +30,13 @@ export default function Showcase() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function Showcase() {
+  return (
+    <Suspense>
+      <ShowcasePage />
+    </Suspense>
   )
 }
