@@ -155,8 +155,8 @@ export default function RandomPage() {
     // 第二阶段：减速并最终选中目标
     const secondPhaseHighlight = async () => {
       let interval = 100 // 初始间隔
-      const maxInterval = 400 // 最大间隔
-      const acceleration = 1.5 // 加速因子
+      const maxInterval = 200 // 最大间隔
+      const acceleration = 5 // 加速因子
 
       // 获取目标玩家在可用玩家中的位置
       const targetIndex = availablePlayers.indexOf(nextSelectedIndex)

@@ -60,7 +60,7 @@ export default function OneOnOne() {
         <motion.div
           id="player-0"
           className={cn(
-            'h-[80px] w-[300px] rounded-lg p-4 text-right shadow-md',
+            'h-[80px] w-[300px] rounded-lg p-4 text-right',
             'transition-[opacity,background,transform,color,font-size] duration-500 ease-in-out'
           )}
           animate={{
@@ -89,7 +89,7 @@ export default function OneOnOne() {
         <motion.div
           id="player-1"
           className={cn(
-            'h-[80px] w-[300px] rounded-lg p-4 text-left shadow-md',
+            'h-[80px] w-[300px] rounded-lg p-4 text-left',
             'transition-[opacity,background,transform,color,font-size] duration-500 ease-in-out'
           )}
           animate={{

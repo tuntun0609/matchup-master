@@ -230,13 +230,12 @@ export default function OneOnOne() {
               key={index}
               style={transformStyles[index]}
               className={cn(
-                'w-[180px] rounded-lg p-4 text-center shadow-md',
+                'w-[180px] rounded-lg p-4 text-center',
                 'flex h-[80px] items-center justify-center',
                 'transition-[opacity,background,transform,color,font-size] duration-500 ease-in-out',
                 highlightIndex === null &&
                   'transition-[opacity,background,transform,color,font-size,border-color,shadow]',
                 (highlightIndex === index || highlightedPlayers.includes(player)) && 'border-2',
-                'bg-white dark:bg-black',
                 highlightedPlayers.includes(player) && 'z-50',
                 isScaling && 'z-10',
                 !otherCardsVisible && !highlightedPlayers.includes(player)
@@ -255,13 +254,13 @@ export default function OneOnOne() {
                         ? 'rgb(59, 130, 246)'
                         : highlightedPlayers.includes(player)
                           ? 'rgb(59, 130, 246)'
-                          : 'var(--border)',
-                backgroundColor:
-                  showVsAnimation && highlightedPlayers.includes(player)
-                    ? 'transparent'
-                    : winPlayers.includes(player)
-                      ? 'rgba(34, 197, 94, 0.5, 0)'
-                      : 'var(--background)',
+                          : 'transparent',
+                // backgroundColor:
+                //   showVsAnimation && highlightedPlayers.includes(player)
+                //     ? 'transparent'
+                //     : winPlayers.includes(player)
+                //       ? 'rgba(34, 197, 94, 0.5)'
+                //       : 'transparent',
               }}
               transition={{
                 type: 'spring',

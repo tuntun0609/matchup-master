@@ -9,6 +9,11 @@ export default function PlaygroundLayout({ children }: { children: React.ReactNo
     <div
       style={{
         fontFamily: ShangShouJinSongTi.style.fontFamily,
+        backgroundImage: 'url(/bg.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        minHeight: '100vh',
       }}
     >
       {children}

@@ -154,7 +154,7 @@ export default function EightStrongFirstRound() {
                 id={`player-${players.findIndex(p => p === group[0])}`}
                 style={transformStyles[players.findIndex(p => p === group[0])]}
                 className={cn(
-                  'w-[180px] rounded-lg border-2 border-transparent bg-transparent p-4 text-center shadow-md',
+                  'w-[180px] rounded-lg border-2 border-transparent bg-transparent p-4 text-center',
                   'flex h-[80px] items-center justify-center',
                   'transition-[opacity,background,transform,color,font-size] duration-500 ease-in-out',
                   'transition-[opacity,background,transform,color,font-size,border-color]',
@@ -210,7 +210,7 @@ export default function EightStrongFirstRound() {
                   id={`player-${players.findIndex(p => p === group[1])}`}
                   style={transformStyles[players.findIndex(p => p === group[1])]}
                   className={cn(
-                    'w-[180px] rounded-lg border-2 border-transparent bg-transparent p-4 text-center shadow-md',
+                    'w-[180px] rounded-lg border-2 border-transparent bg-transparent p-4 text-center',
                     'flex h-[80px] items-center justify-center',
                     'transition-[opacity,background,transform,color,font-size] duration-500 ease-in-out',
                     'transition-[opacity,background,transform,color,font-size,border-color]',
