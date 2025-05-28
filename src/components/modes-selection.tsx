@@ -15,14 +15,14 @@ const modes = [
     href: '/one-on-one-group',
   },
   {
-    title: '8强第一轮',
-    description: '8强第一轮比赛',
+    title: '8个人两两抽签',
+    description: '8个人两两抽签',
     icon: Trophy,
     href: '/eight-strong-first-round',
   },
   {
-    title: '8强其余轮次',
-    description: '8强其余轮次比赛',
+    title: '4个人两两抽签',
+    description: '4个人两两抽签',
     icon: Trophy,
     href: '/eight-strong-second-round',
   },

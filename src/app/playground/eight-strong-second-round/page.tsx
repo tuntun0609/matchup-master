@@ -195,8 +195,8 @@ export default function EightStrongFirstRound() {
                 <motion.p
                   data-player={group[0]}
                   className={cn(
-                    'text-4xl text-gray-900 dark:text-gray-100',
-                    winPlayers.includes(group[0]) && 'text-glow'
+                    'text-4xl text-gray-900 transition-colors duration-500 dark:text-gray-100',
+                    winPlayers.includes(group[0]) && '!text-[#f3df8e]'
                   )}
                   animate={{
                     scale: highlightedPlayers.includes(group[0]) && !showVsAnimation ? 1 : 1,
@@ -270,8 +270,8 @@ export default function EightStrongFirstRound() {
                   <motion.p
                     data-player={group[1]}
                     className={cn(
-                      'text-4xl text-gray-900 dark:text-gray-100',
-                      winPlayers.includes(group[1]) && 'text-glow'
+                      'text-4xl text-gray-900 transition-colors duration-500 dark:text-gray-100',
+                      winPlayers.includes(group[1]) && '!text-[#f3df8e]'
                     )}
                     animate={{
                       scale: highlightedPlayers.includes(group[1]) && !showVsAnimation ? 1 : 1,

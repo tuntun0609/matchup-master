@@ -179,8 +179,8 @@ export default function EightStrongFirstRound() {
                     delay: highlightedPlayers.includes(group[0]) ? 0.2 : 0,
                   }}
                   className={cn(
-                    'text-4xl text-gray-900 dark:text-gray-100',
-                    winPlayers.includes(group[0]) && 'text-glow'
+                    'text-4xl text-gray-900 transition-colors duration-500 dark:text-gray-100',
+                    winPlayers.includes(group[0]) && '!text-[#f3df8e]'
                   )}
                   data-player={group[0]}
                 >
@@ -235,8 +235,8 @@ export default function EightStrongFirstRound() {
                       delay: highlightedPlayers.includes(group[1]) ? 0.2 : 0,
                     }}
                     className={cn(
-                      'text-4xl text-gray-900 dark:text-gray-100',
-                      winPlayers.includes(group[1]) && 'text-glow'
+                      'text-4xl text-gray-900 transition-colors duration-500 dark:text-gray-100',
+                      winPlayers.includes(group[1]) && '!text-[#f3df8e]'
                     )}
                     data-player={group[1]}
                   >
