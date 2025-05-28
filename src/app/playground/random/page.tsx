@@ -141,7 +141,7 @@ export default function RandomPage() {
       .map(item => item.index)
 
     // 第一阶段：快速循环两圈
-    const fastInterval = 40 // 快速循环的间隔时间
+    const fastInterval = 20 // 快速循环的间隔时间
     const firstPhaseHighlight = async () => {
       // 完成两圈快速循环
       for (let round = 0; round < 1; round++) {
@@ -154,9 +154,9 @@ export default function RandomPage() {
 
     // 第二阶段：减速并最终选中目标
     const secondPhaseHighlight = async () => {
-      let interval = 100 // 初始间隔
-      const maxInterval = 200 // 最大间隔
-      const acceleration = 5 // 加速因子
+      let interval = 50 // 初始间隔
+      const maxInterval = 100 // 最大间隔
+      const acceleration = 10 // 加速因子
 
       // 获取目标玩家在可用玩家中的位置
       const targetIndex = availablePlayers.indexOf(nextSelectedIndex)

@@ -12,6 +12,7 @@ import { eightStrongSecondRoundPlayersAtom } from '@/store/players'
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 export default function EightStrongFirstRound() {
+  const [isRandom, setIsRandom] = useState(true)
   const [players] = useAtom(eightStrongSecondRoundPlayersAtom)
   const [playerGroups, setPlayerGroups] = useState<string[][]>([])
   const [isSelecting, setIsSelecting] = useState(false)
@@ -148,115 +149,69 @@ export default function EightStrongFirstRound() {
 
   return (
     <>
-      <div className="relative flex min-h-screen flex-col items-center justify-center gap-8">
-        <div className="max-w-8xl grid grid-cols-2 gap-x-48 gap-y-24">
-          {playerGroups.map((group, groupIndex) => (
-            <div key={groupIndex} className="flex items-center justify-center gap-x-8">
-              <motion.div
-                id={`player-${players.findIndex(p => p === group[0])}`}
-                style={transformStyles[players.findIndex(p => p === group[0])]}
-                className={cn(
-                  'w-[180px] rounded-lg border-2 border-transparent bg-transparent p-4 text-center',
-                  'flex h-[80px] items-center justify-center',
-                  'transition-[opacity,background,transform,color,font-size] duration-500 ease-in-out',
-                  highlightIndex === null &&
-                    'transition-[opacity,background,transform,color,font-size,border-color]',
-                  highlightedPlayers.includes(group[0]) && 'z-50',
-                  !otherCardsVisible && !highlightedPlayers.includes(group[0]) && 'opacity-0'
-                )}
-                animate={
-                  {
-                    // borderColor:
-                    //   showVsAnimation && highlightedPlayers.includes(group[0])
-                    //     ? 'transparent'
-                    //     : winPlayers.includes(group[0])
-                    //       ? 'rgb(34, 197, 94)' // 绿色
-                    //       : losePlayers.includes(group[0])
-                    //         ? 'rgb(239, 68, 68)' // 红色
-                    //         : highlightIndex === players.findIndex(p => p === group[0])
-                    //           ? 'rgb(59, 130, 246)'
-                    //           : 'transparent',
-                    // backgroundColor:
-                    //   showVsAnimation && highlightedPlayers.includes(group[0])
-                    //     ? 'transparent'
-                    //     : winPlayers.includes(group[0])
-                    //       ? 'rgba(34, 197, 94, 0.5)'
-                    //       : losePlayers.includes(group[0])
-                    //         ? 'rgba(239, 68, 68, 0.5)'
-                    //         : 'var(--background)',
-                  }
-                }
-                transition={{
-                  type: 'spring',
-                  stiffness: 400,
-                  damping: 25,
-                }}
-              >
-                <motion.p
-                  data-player={group[0]}
-                  className={cn(
-                    'text-4xl text-gray-900 transition-colors duration-500 dark:text-gray-100',
-                    winPlayers.includes(group[0]) && '!text-[#f3df8e]'
-                  )}
-                  animate={{
-                    scale: highlightedPlayers.includes(group[0]) && !showVsAnimation ? 1 : 1,
-                  }}
-                  transition={{
-                    delay: highlightedPlayers.includes(group[0]) ? 0.2 : 0,
-                  }}
-                >
-                  {group[0]}
-                </motion.p>
-              </motion.div>
-
-              <motion.div
-                className={cn(
-                  'text-4xl font-bold text-gray-600 transition-opacity duration-500 ease-in-out dark:text-gray-400',
-                  !otherCardsVisible && 'opacity-0'
-                )}
-                animate={{
-                  scale: showVsAnimation ? 1.5 : 1,
-                  opacity: otherCardsVisible ? 1 : 0,
-                }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 300,
-                  damping: 20,
-                }}
-              >
-                VS
-              </motion.div>
-              {group[1] && (
+      <div
+        className={cn(
+          'fixed top-0 left-0 z-50 flex h-screen w-full items-center justify-center',
+          !isRandom && 'pointer-events-none opacity-0'
+        )}
+      >
+        <motion.div
+          onClick={() => setIsRandom(false)}
+          className="flex items-center gap-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <motion.div
+            className="text-6xl font-bold text-gray-900 dark:text-gray-100"
+            animate={{
+              scale: [1, 1.1, 1],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          >
+            随机分组中
+          </motion.div>
+        </motion.div>
+      </div>
+      <div className={cn(isRandom && 'opacity-0')}>
+        <div className="relative flex min-h-screen flex-col items-center justify-center gap-8">
+          <div className="max-w-8xl grid grid-cols-2 gap-x-48 gap-y-24">
+            {playerGroups.map((group, groupIndex) => (
+              <div key={groupIndex} className="flex items-center justify-center gap-x-8">
                 <motion.div
-                  id={`player-${players.findIndex(p => p === group[1])}`}
-                  style={transformStyles[players.findIndex(p => p === group[1])]}
+                  id={`player-${players.findIndex(p => p === group[0])}`}
+                  style={transformStyles[players.findIndex(p => p === group[0])]}
                   className={cn(
                     'w-[180px] rounded-lg border-2 border-transparent bg-transparent p-4 text-center',
                     'flex h-[80px] items-center justify-center',
                     'transition-[opacity,background,transform,color,font-size] duration-500 ease-in-out',
                     highlightIndex === null &&
                       'transition-[opacity,background,transform,color,font-size,border-color]',
-                    highlightedPlayers.includes(group[1]) && 'z-50',
-                    !otherCardsVisible && !highlightedPlayers.includes(group[1]) && 'opacity-0'
+                    highlightedPlayers.includes(group[0]) && 'z-50',
+                    !otherCardsVisible && !highlightedPlayers.includes(group[0]) && 'opacity-0'
                   )}
                   animate={
                     {
                       // borderColor:
-                      //   showVsAnimation && highlightedPlayers.includes(group[1])
+                      //   showVsAnimation && highlightedPlayers.includes(group[0])
                       //     ? 'transparent'
-                      //     : winPlayers.includes(group[1])
+                      //     : winPlayers.includes(group[0])
                       //       ? 'rgb(34, 197, 94)' // 绿色
-                      //       : losePlayers.includes(group[1])
+                      //       : losePlayers.includes(group[0])
                       //         ? 'rgb(239, 68, 68)' // 红色
-                      //         : highlightIndex === players.findIndex(p => p === group[1])
+                      //         : highlightIndex === players.findIndex(p => p === group[0])
                       //           ? 'rgb(59, 130, 246)'
                       //           : 'transparent',
                       // backgroundColor:
-                      //   showVsAnimation && highlightedPlayers.includes(group[1])
+                      //   showVsAnimation && highlightedPlayers.includes(group[0])
                       //     ? 'transparent'
-                      //     : winPlayers.includes(group[1])
+                      //     : winPlayers.includes(group[0])
                       //       ? 'rgba(34, 197, 94, 0.5)'
-                      //       : losePlayers.includes(group[1])
+                      //       : losePlayers.includes(group[0])
                       //         ? 'rgba(239, 68, 68, 0.5)'
                       //         : 'var(--background)',
                     }
@@ -268,52 +223,128 @@ export default function EightStrongFirstRound() {
                   }}
                 >
                   <motion.p
-                    data-player={group[1]}
+                    data-player={group[0]}
                     className={cn(
                       'text-4xl text-gray-900 transition-colors duration-500 dark:text-gray-100',
-                      winPlayers.includes(group[1]) && '!text-[#f3df8e]'
+                      winPlayers.includes(group[0]) && '!text-[#f3df8e]'
                     )}
                     animate={{
-                      scale: highlightedPlayers.includes(group[1]) && !showVsAnimation ? 1 : 1,
+                      scale: highlightedPlayers.includes(group[0]) && !showVsAnimation ? 1 : 1,
                     }}
                     transition={{
-                      delay: highlightedPlayers.includes(group[1]) ? 0.2 : 0,
+                      delay: highlightedPlayers.includes(group[0]) ? 0.2 : 0,
                     }}
                   >
-                    {group[1]}
+                    {group[0]}
                   </motion.p>
                 </motion.div>
-              )}
-            </div>
-          ))}
+
+                <motion.div
+                  className={cn(
+                    'text-4xl font-bold text-gray-600 transition-opacity duration-500 ease-in-out dark:text-gray-400',
+                    !otherCardsVisible && 'opacity-0'
+                  )}
+                  animate={{
+                    scale: showVsAnimation ? 1.5 : 1,
+                    opacity: otherCardsVisible ? 1 : 0,
+                  }}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 300,
+                    damping: 20,
+                  }}
+                >
+                  VS
+                </motion.div>
+                {group[1] && (
+                  <motion.div
+                    id={`player-${players.findIndex(p => p === group[1])}`}
+                    style={transformStyles[players.findIndex(p => p === group[1])]}
+                    className={cn(
+                      'w-[180px] rounded-lg border-2 border-transparent bg-transparent p-4 text-center',
+                      'flex h-[80px] items-center justify-center',
+                      'transition-[opacity,background,transform,color,font-size] duration-500 ease-in-out',
+                      highlightIndex === null &&
+                        'transition-[opacity,background,transform,color,font-size,border-color]',
+                      highlightedPlayers.includes(group[1]) && 'z-50',
+                      !otherCardsVisible && !highlightedPlayers.includes(group[1]) && 'opacity-0'
+                    )}
+                    animate={
+                      {
+                        // borderColor:
+                        //   showVsAnimation && highlightedPlayers.includes(group[1])
+                        //     ? 'transparent'
+                        //     : winPlayers.includes(group[1])
+                        //       ? 'rgb(34, 197, 94)' // 绿色
+                        //       : losePlayers.includes(group[1])
+                        //         ? 'rgb(239, 68, 68)' // 红色
+                        //         : highlightIndex === players.findIndex(p => p === group[1])
+                        //           ? 'rgb(59, 130, 246)'
+                        //           : 'transparent',
+                        // backgroundColor:
+                        //   showVsAnimation && highlightedPlayers.includes(group[1])
+                        //     ? 'transparent'
+                        //     : winPlayers.includes(group[1])
+                        //       ? 'rgba(34, 197, 94, 0.5)'
+                        //       : losePlayers.includes(group[1])
+                        //         ? 'rgba(239, 68, 68, 0.5)'
+                        //         : 'var(--background)',
+                      }
+                    }
+                    transition={{
+                      type: 'spring',
+                      stiffness: 400,
+                      damping: 25,
+                    }}
+                  >
+                    <motion.p
+                      data-player={group[1]}
+                      className={cn(
+                        'text-4xl text-gray-900 transition-colors duration-500 dark:text-gray-100',
+                        winPlayers.includes(group[1]) && '!text-[#f3df8e]'
+                      )}
+                      animate={{
+                        scale: highlightedPlayers.includes(group[1]) && !showVsAnimation ? 1 : 1,
+                      }}
+                      transition={{
+                        delay: highlightedPlayers.includes(group[1]) ? 0.2 : 0,
+                      }}
+                    >
+                      {group[1]}
+                    </motion.p>
+                  </motion.div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {showVsAnimation && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="vs-text fixed top-1/2 left-1/2 z-40 -translate-x-1/2 -translate-y-1/2 text-6xl font-bold"
+            >
+              <span className="bg-white bg-clip-text text-transparent">VS</span>
+            </motion.div>
+          )}
         </div>
 
-        {showVsAnimation && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="vs-text fixed top-1/2 left-1/2 z-40 -translate-x-1/2 -translate-y-1/2 text-6xl font-bold"
+        <div className="fixed bottom-0 left-0 flex justify-center gap-4 p-4">
+          <Button
+            onClick={startGame}
+            disabled={isSelecting || highlightedPlayers.length !== 0}
+            variant="outline"
           >
-            <span className="bg-white bg-clip-text text-transparent">VS</span>
-          </motion.div>
-        )}
-      </div>
-
-      <div className="fixed bottom-0 left-0 flex justify-center gap-4 p-4">
-        <Button
-          onClick={startGame}
-          disabled={isSelecting || highlightedPlayers.length !== 0}
-          variant="outline"
-        >
-          <ChevronRight />
-        </Button>
-        <Button variant="outline" onClick={() => handleWin(true)}>
-          L
-        </Button>
-        <Button variant="outline" onClick={() => handleWin(false)}>
-          R
-        </Button>
+            <ChevronRight />
+          </Button>
+          <Button variant="outline" onClick={() => handleWin(true)}>
+            L
+          </Button>
+          <Button variant="outline" onClick={() => handleWin(false)}>
+            R
+          </Button>
+        </div>
       </div>
     </>
   )
