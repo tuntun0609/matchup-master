@@ -21,10 +21,16 @@ const modes = [
     href: '/eight-strong-first-round',
   },
   {
-    title: '4个人两两抽签',
-    description: '4个人两两抽签',
+    title: '4个人两两抽签（纯随机）',
+    description: '4个人两两抽签（纯随机）',
     icon: Trophy,
     href: '/eight-strong-second-round',
+  },
+  {
+    title: '4个人两两抽签（有分组）',
+    description: '4个人两两抽签（有分组）',
+    icon: Trophy,
+    href: '/eight-strong-second-round-group',
   },
   {
     title: '两名选手 1v1',

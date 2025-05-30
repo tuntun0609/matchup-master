@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -10,4 +11,10 @@ export const getSystemTheme = () => {
   const isDark = media.matches
   const systemTheme = isDark ? 'dark' : 'light'
   return systemTheme
+}
+
+export const useLatest = <T>(fn: T) => {
+  const ref = useRef(fn)
+  ref.current = fn
+  return ref
 }

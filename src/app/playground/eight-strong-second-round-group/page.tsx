@@ -7,13 +7,13 @@ import { AnimatePresence, motion } from 'motion/react'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { eightStrongSecondRoundPlayersAtom } from '@/store/players'
+import { eightStrongSecondRoundGroupPlayersAtom } from '@/store/players'
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
-export default function EightStrongFirstRound() {
+export default function EightStrongSecondRoundGroup() {
   const [isRandom, setIsRandom] = useState(true)
-  const [players] = useAtom(eightStrongSecondRoundPlayersAtom)
+  const [players] = useAtom(eightStrongSecondRoundGroupPlayersAtom)
   const [playerGroups, setPlayerGroups] = useState<string[][]>([])
   const [isSelecting, setIsSelecting] = useState(false)
   const [highlightIndex, setHighlightIndex] = useState<number | null>(null)
@@ -29,18 +29,23 @@ export default function EightStrongFirstRound() {
   useEffect(() => {
     if (!players.length) return
 
-    // 创建玩家数组的副本并随机打乱
-    const shuffledPlayers = [...players].sort(() => Math.random() - 0.5)
+    // 前两名和后两名分别为一组
+    const firstGroup = players.slice(0, 2)
+    const secondGroup = players.slice(2, 4)
 
-    // 两两分组
-    const groups: string[][] = []
-    for (let i = 0; i < shuffledPlayers.length; i += 2) {
-      if (i + 1 < shuffledPlayers.length) {
-        groups.push([shuffledPlayers[i], shuffledPlayers[i + 1]])
-      } else {
-        groups.push([shuffledPlayers[i]])
-      }
-    }
+    // 从每组随机选择一个玩家
+    const randomFromFirst = firstGroup[Math.floor(Math.random() * firstGroup.length)]
+    const randomFromSecond = secondGroup[Math.floor(Math.random() * secondGroup.length)]
+
+    // 剩下的玩家
+    const remainingFromFirst = firstGroup.find(p => p !== randomFromFirst)!
+    const remainingFromSecond = secondGroup.find(p => p !== randomFromSecond)!
+
+    // 创建最终的比赛组
+    const groups = [
+      [randomFromFirst, randomFromSecond],
+      [remainingFromFirst, remainingFromSecond],
+    ]
 
     setPlayerGroups(groups)
   }, [players])

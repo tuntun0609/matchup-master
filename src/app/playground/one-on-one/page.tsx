@@ -54,6 +54,23 @@ export default function OneOnOne() {
     setShowVs(false)
   }
 
+  const handleWinKeydown = (e: KeyboardEvent) => {
+    if (winner) return
+    if (e.key === 'k' || e.key === 'K') {
+      handleWin(players[0])
+    } else if (e.key === 'l' || e.key === 'L') {
+      handleWin(players[1])
+    }
+  }
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleWinKeydown)
+
+    return () => {
+      window.removeEventListener('keydown', handleWinKeydown)
+    }
+  }, [handleWinKeydown])
+
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center">
       <div className="flex items-center justify-center gap-20">
@@ -107,7 +124,7 @@ export default function OneOnOne() {
       </div>
 
       <div className="fixed bottom-8 left-8 flex gap-4">
-        <Button
+        {/* <Button
           size="sm"
           variant="outline"
           onClick={() => handleWin(players[0])}
@@ -122,7 +139,7 @@ export default function OneOnOne() {
           disabled={!!winner}
         >
           <ChevronRight />
-        </Button>
+        </Button> */}
       </div>
     </div>
   )

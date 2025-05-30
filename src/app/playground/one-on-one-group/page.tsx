@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useAtom } from 'jotai'
 import { ChevronRight } from 'lucide-react'
 import { motion } from 'motion/react'
 
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { cn, useLatest } from '@/lib/utils'
 import { oneOnOneGroupPlayersAtom } from '@/store/players'
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
@@ -99,6 +99,10 @@ export default function OneOnOne() {
   const startGame = async () => {
     if (isSelecting) return
 
+    if (winPlayers.length + losePlayers.length === players.length) {
+      return
+    }
+
     if (highlightedPlayers.length > 0) {
       // 重置所有状态
       setHighlightedPlayers([])
@@ -131,8 +135,8 @@ export default function OneOnOne() {
 
         // 减速动画到第一个玩家
         let interval = 100
-        const maxInterval = 300
-        const acceleration = 1.3
+        const maxInterval = 200
+        const acceleration = 4
 
         for (let i = 0; i < firstPlayerIndex; i++) {
           // 如果已经被选过，则跳过
@@ -220,6 +224,46 @@ export default function OneOnOne() {
     }, 500)
   }
 
+  const handleStartGame = useCallback(
+    (e: KeyboardEvent) => {
+      console.log('handleStartGame', isSelecting, highlightedPlayers.length)
+      if (isSelecting || highlightedPlayers.length !== 0) {
+        return
+      }
+      if (e.key === 'j' || e.key === 'J') {
+        startGame()
+      }
+    },
+    [isSelecting, highlightedPlayers, startGame]
+  )
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleStartGame)
+
+    return () => {
+      window.removeEventListener('keydown', handleStartGame)
+    }
+  }, [handleStartGame])
+
+  const handleWinKeydown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'k' || e.key === 'K') {
+        handleWin(true)
+      } else if (e.key === 'l' || e.key === 'L') {
+        handleWin(false)
+      }
+    },
+    [handleWin, handleWin]
+  )
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleWinKeydown)
+
+    return () => {
+      window.removeEventListener('keydown', handleWinKeydown)
+    }
+  }, [handleWinKeydown])
+
   return (
     <>
       <div className="relative flex min-h-screen flex-col items-center justify-center gap-8">
@@ -271,8 +315,18 @@ export default function OneOnOne() {
               <motion.p
                 data-player={player}
                 className={cn(
-                  'text-2xl text-gray-900 transition-colors duration-500 dark:text-gray-100',
-                  winPlayers.includes(player) && '!text-[#f3df8e]'
+                  'text-3xl text-gray-900 transition-colors duration-500 dark:text-gray-100',
+                  winPlayers.includes(player) && '!text-[#f3df8e]',
+                  player === highlightedPlayers[0] &&
+                    showVsAnimation &&
+                    !winPlayers.includes(player) &&
+                    !losePlayers.includes(player) &&
+                    'bg-gradient-to-b from-red-400 to-white bg-clip-text !text-transparent',
+                  player === highlightedPlayers[1] &&
+                    showVsAnimation &&
+                    !winPlayers.includes(player) &&
+                    !losePlayers.includes(player) &&
+                    'bg-gradient-to-b from-blue-400 to-white bg-clip-text !text-transparent'
                 )}
                 animate={{
                   // color: winPlayers.includes(player) ? '#f3df8e' : 'inherit',
@@ -304,7 +358,7 @@ export default function OneOnOne() {
       </div>
 
       <div className="fixed bottom-0 left-0 flex justify-center gap-4 p-4">
-        <Button
+        {/* <Button
           onClick={startGame}
           disabled={isSelecting || highlightedPlayers.length !== 0}
           variant="outline"
@@ -316,7 +370,7 @@ export default function OneOnOne() {
         </Button>
         <Button variant="outline" onClick={() => handleWin(false)}>
           R
-        </Button>
+        </Button> */}
       </div>
     </>
   )

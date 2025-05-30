@@ -1,12 +1,13 @@
 'use client'
 
-import { useCallback, useState, useEffect } from 'react'
+import { useCallback, useState, useEffect, useRef } from 'react'
 import { useAtom } from 'jotai'
 import { shuffle } from 'lodash-es'
 import { ChevronRight } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
 
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { cn, useLatest } from '@/lib/utils'
 import { playersAtom } from '@/store/players'
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
@@ -21,6 +22,8 @@ export default function RandomPage() {
   const [highlightIndex, setHighlightIndex] = useState<number | null>(null)
   const [isSelecting, setIsSelecting] = useState(false)
   const [otherCardsVisible, setOtherCardsVisible] = useState(true)
+  const [step, setStep] = useState<'no-order' | 'order' | 'ordering'>('no-order')
+  const isAnimating = useRef(false)
 
   // 初始化时生成随机顺序
   useEffect(() => {
@@ -33,6 +36,7 @@ export default function RandomPage() {
     if (selectedIndex !== null) {
       // 延迟一帧，确保DOM已更新
       requestAnimationFrame(() => {
+        isAnimating.current = true
         const element = document.getElementById(`player-${selectedIndex}`)
         if (element) {
           const rect = element.getBoundingClientRect()
@@ -67,6 +71,7 @@ export default function RandomPage() {
               textElement.style.scale = '6'
               textElement.style.color = 'var(--green-700)'
             }
+            isAnimating.current = false
           }, 500) // 在卡片到达中央后再变化字体
         }
       })
@@ -76,6 +81,15 @@ export default function RandomPage() {
   }, [selectedIndex])
 
   const startSelection = useCallback(async () => {
+    if (isAnimating.current) return
+    if (step === 'no-order') {
+      setStep('ordering')
+      return
+    } else if (step === 'ordering') {
+      setStep('order')
+      return
+    }
+
     // 如果有已选中的玩家，先将其移回原位
     if (selectedIndex !== null) {
       // 找到选中玩家的文本元素并重置样式
@@ -105,149 +119,159 @@ export default function RandomPage() {
       return
     }
 
-    if (currentSelectionIndex >= selectionOrder.length) {
-      // 所有玩家都已被选择
-      setIsSelecting(false)
-      return
-    }
+    setSelectedIndex(currentSelectionIndex)
+    setSelectedList(prev => [...prev, players[selectionOrder[currentSelectionIndex]]])
+    setCurrentSelectionIndex(prev => prev + 1)
+  }, [currentSelectionIndex, step, selectionOrder, players, selectedIndex, selectedList])
 
-    // 开始选择动画
-    setIsSelecting(true)
+  const startSelectionLatest = useLatest(startSelection)
 
-    const nextSelectedIndex = selectionOrder[currentSelectionIndex]
-
-    // 计算未选择的玩家数量
-    const remainingPlayers = players.length - selectedList.length
-
-    // 如果只剩最后一个玩家，直接选中它
-    if (remainingPlayers === 1) {
-      // 找出最后一个未选择的玩家
-      const lastPlayerIndex = players.findIndex(player => !selectedList.includes(player))
-
-      // 直接选中该玩家
-      setSelectedIndex(lastPlayerIndex)
-      setSelectedList(prev => [...prev, players[lastPlayerIndex]])
-      setCurrentSelectionIndex(prev => prev + 1)
-
-      // 不执行后续的选择动画
-      setIsSelecting(false)
-      return
-    }
-
-    // 创建未选择的玩家索引数组
-    const availablePlayers = players
-      .map((player, index) => ({ player, index }))
-      .filter(item => !selectedList.includes(item.player))
-      .map(item => item.index)
-
-    // 第一阶段：快速循环两圈
-    const fastInterval = 20 // 快速循环的间隔时间
-    const firstPhaseHighlight = async () => {
-      // 完成两圈快速循环
-      for (let round = 0; round < 1; round++) {
-        for (let i = 0; i < availablePlayers.length; i++) {
-          setHighlightIndex(availablePlayers[i])
-          await sleep(fastInterval)
-        }
+  useEffect(() => {
+    // 添加快捷键监听
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'j' || e.key === 'J') {
+        e.preventDefault()
+        startSelectionLatest.current()
       }
     }
 
-    // 第二阶段：减速并最终选中目标
-    const secondPhaseHighlight = async () => {
-      let interval = 50 // 初始间隔
-      const maxInterval = 100 // 最大间隔
-      const acceleration = 10 // 加速因子
-
-      // 获取目标玩家在可用玩家中的位置
-      const targetIndex = availablePlayers.indexOf(nextSelectedIndex)
-
-      // 从随机位置开始减速
-      const currentPos = Math.floor(Math.random() * availablePlayers.length)
-
-      for (let i = 0; i < currentPos; i++) {
-        setHighlightIndex(availablePlayers[i])
-        await sleep(50)
-      }
-
-      // 计算需要循环几次才能到达目标玩家
-      const stepsToTarget =
-        (availablePlayers.length - currentPos + targetIndex) % availablePlayers.length
-
-      // 逐渐减速，最终停在目标玩家
-      for (let i = 0; i <= stepsToTarget; i++) {
-        const index = (currentPos + i) % availablePlayers.length
-        setHighlightIndex(availablePlayers[index])
-
-        // 接近目标时，逐渐减速
-        if (i > stepsToTarget / 2) {
-          interval = Math.min(interval * acceleration, maxInterval)
-        }
-
-        await sleep(interval)
-      }
+    // 添加和移除事件监听器
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
     }
-
-    // 执行两个阶段的动画
-    try {
-      await firstPhaseHighlight()
-      await secondPhaseHighlight()
-
-      // 最终选中目标玩家
-      await sleep(500)
-      setHighlightIndex(null)
-      setSelectedIndex(nextSelectedIndex)
-      setSelectedList(prev => [...prev, players[nextSelectedIndex]])
-      setCurrentSelectionIndex(prev => prev + 1)
-    } finally {
-      setIsSelecting(false)
-    }
-  }, [currentSelectionIndex, selectionOrder, players, selectedIndex, selectedList])
+  }, [])
 
   return (
     <>
-      <div className="relative flex min-h-screen flex-col items-center justify-center gap-8">
-        <div className="max-w-8xl flex flex-wrap justify-center gap-x-4 gap-y-6">
-          {players.map((player, index) => (
-            <div
-              id={`player-${index}`}
-              key={index}
-              style={selectedIndex === index ? transformStyles[index] : {}}
-              className={cn(
-                'w-[180px] rounded-lg bg-transparent p-4 text-center shadow-md',
-                'flex h-[80px] items-center justify-center',
-                // 已选择过的玩家样式变淡
-                selectedList.includes(player) && selectedIndex !== index && 'opacity-50',
-                // 其他卡片隐藏
-                selectedIndex !== null &&
-                  selectedIndex !== index &&
-                  !otherCardsVisible &&
-                  'opacity-0',
-                // 动画过渡，只对特定属性应用
-                'transition-[opacity,transform,background,color,font-size] duration-500 ease-in-out',
-                selectedIndex === index && 'z-50',
-                highlightIndex === index &&
-                  selectedIndex !== index &&
-                  !selectedList.includes(player) &&
-                  'border-2 border-blue-500 shadow-lg dark:shadow-blue-900/50'
-              )}
-            >
-              <p
-                className={cn(
-                  'text-lg transition-all duration-500',
-                  selectedIndex !== index && 'text-gray-900 dark:text-gray-100'
-                )}
-              >
-                {player}
-              </p>
+      <AnimatePresence mode="wait">
+        {step === 'no-order' && (
+          <motion.div
+            exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            key="no-order"
+            className="relative flex min-h-screen flex-col items-center justify-center gap-8"
+          >
+            <div className="max-w-8xl flex flex-wrap justify-center gap-x-4 gap-y-6">
+              {players.map((player, index) => {
+                return (
+                  <div
+                    id={`player-${index}`}
+                    key={index}
+                    className={cn(
+                      'w-[180px] rounded-lg bg-transparent p-4 text-center shadow-md',
+                      'flex h-[80px] items-center justify-center'
+                      // 已选择过的玩家样式变淡
+                      // selectedList.includes(player) && selectedIndex !== index && 'opacity-50',
+                      // // 其他卡片隐藏
+                      // selectedIndex !== null &&
+                      //   selectedIndex !== index &&
+                      //   !otherCardsVisible &&
+                      //   'opacity-0',
+                      // // 动画过渡，只对特定属性应用
+                      // 'transition-[opacity,transform,background,color,font-size] duration-500 ease-in-out',
+                      // selectedIndex === index && 'z-50',
+                      // highlightIndex === index &&
+                      //   selectedIndex !== index &&
+                      //   !selectedList.includes(player) &&
+                      //   'border-2 border-blue-500 shadow-lg dark:shadow-blue-900/50'
+                    )}
+                  >
+                    <p
+                      className={cn(
+                        'text-3xl transition-all duration-500'
+                        // selectedIndex !== index && 'text-gray-900 dark:text-gray-100'
+                      )}
+                    >
+                      {player}
+                    </p>
+                  </div>
+                )
+              })}
             </div>
-          ))}
-        </div>
-      </div>
+          </motion.div>
+        )}
+        {step === 'ordering' && (
+          <motion.div
+            key="ordering"
+            className="flex min-h-screen min-w-screen items-center justify-center gap-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <motion.div
+              className="text-6xl font-bold text-gray-900 dark:text-gray-100"
+              animate={{
+                scale: [1, 1.1, 1],
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+            >
+              随机排序中
+            </motion.div>
+          </motion.div>
+        )}
+        {step === 'order' && (
+          <motion.div
+            exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            key="order"
+            className="relative flex min-h-screen flex-col items-center justify-center gap-8"
+          >
+            <div className="max-w-8xl flex flex-wrap justify-center gap-x-4 gap-y-6">
+              {selectionOrder.map((playerIndex, index) => {
+                const player = players[playerIndex]
+                return (
+                  <div
+                    id={`player-${index}`}
+                    key={index}
+                    style={selectedIndex === index ? transformStyles[index] : {}}
+                    className={cn(
+                      'w-[180px] rounded-lg bg-transparent p-4 text-center shadow-md',
+                      'flex h-[80px] items-center justify-center',
+                      // 已选择过的玩家样式变淡
+                      selectedList.includes(player) && selectedIndex !== index && 'opacity-50',
+                      // 其他卡片隐藏
+                      selectedIndex !== null &&
+                        selectedIndex !== index &&
+                        !otherCardsVisible &&
+                        'opacity-0',
+                      // 动画过渡，只对特定属性应用
+                      'transition-[opacity,transform,background,color,font-size] duration-500 ease-in-out',
+                      selectedIndex === index && 'z-50',
+                      highlightIndex === index &&
+                        selectedIndex !== index &&
+                        !selectedList.includes(player) &&
+                        'border-2 border-blue-500 shadow-lg dark:shadow-blue-900/50'
+                    )}
+                  >
+                    <p
+                      className={cn(
+                        'text-3xl transition-all duration-500',
+                        selectedIndex !== index && 'text-gray-900 dark:text-gray-100'
+                      )}
+                    >
+                      {player}
+                    </p>
+                  </div>
+                )
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="fixed bottom-2 left-2 flex items-center gap-4">
-        <Button onClick={startSelection} disabled={isSelecting} variant="outline">
+        {/* <Button onClick={startSelection} disabled={isSelecting} variant="outline">
           <ChevronRight />
-        </Button>
+        </Button> */}
       </div>
     </>
   )
