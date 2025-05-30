@@ -169,10 +169,10 @@ export default function SelectSong() {
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if (e.key === 's') {
+      if (e.key === 's' || e.key === 'S') {
         e.preventDefault()
         setOpen((prevOpen: boolean) => !prevOpen)
-      } else if (e.key === 'd') {
+      } else if (e.key === 'd' || e.key === 'D') {
         startSpinningLatest.current()
       }
     }
