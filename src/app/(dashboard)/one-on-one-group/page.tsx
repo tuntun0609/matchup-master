@@ -68,7 +68,7 @@ export default function OneOnOneForm() {
       </div>
 
       <div>
-        {players.length > 1 && (
+        {players.length === 16 && (
           <Button className="w-full" size="lg" onClick={handleStartGame}>
             开始比赛
           </Button>

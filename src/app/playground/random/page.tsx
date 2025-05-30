@@ -5,6 +5,7 @@ import { useAtom } from 'jotai'
 import { shuffle } from 'lodash-es'
 import { ChevronRight } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
+import { Metadata } from 'next'
 
 import { Button } from '@/components/ui/button'
 import { cn, useLatest } from '@/lib/utils'
